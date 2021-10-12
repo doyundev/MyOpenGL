@@ -18,7 +18,7 @@
     <ClCompile Include="AppMain.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\OpenGLPrecompiled\glad\src\glad.c">
+    <ClCompile Include="glad.c">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>

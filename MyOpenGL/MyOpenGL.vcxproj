@@ -130,8 +130,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\..\..\..\OpenGLPrecompiled\glad\src\glad.c" />
     <ClCompile Include="AppMain.cpp" />
+    <ClCompile Include="glad.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
