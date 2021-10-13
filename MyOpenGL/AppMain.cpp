@@ -110,8 +110,12 @@ int main() {
 
 			// VAO 로 그려주는 방법
 			glUseProgram(shaderProgram2);
+			int uniformLocation = glGetUniformLocation(shaderProgram2, "tintColor");
+			glUniform3f(uniformLocation, 1.0f, 0.0f, 0.0f);
 			glBindVertexArray(VAO[0]);
 			glDrawArrays(GL_TRIANGLES, 0, 3);
+
+			glUniform3f(uniformLocation, 1.0f, 1.0f, 0.0f);
 			glBindVertexArray(VAO[1]);
 			glDrawArrays(GL_TRIANGLES, 0, 3);
 
@@ -177,9 +181,10 @@ unsigned int compileVertexColorShader() {
 unsigned int compileFragmentShader() {
 	const char *fragmentShaderSource = "#version 330 core\n"
 		"out vec4 FragColor;\n"
+		"uniform vec3 tintColor;\n"
 		"in vec3 ourColor;\n"
 		"void main(){\n"
-		"	FragColor = vec4(ourColor.x,ourColor.y,ourColor.z,1.0f);\n"
+		"	FragColor = vec4(tintColor.x,tintColor.y,tintColor.z,1.0f);\n"
 		"}\0";
 
 	unsigned int fragmentShader;
