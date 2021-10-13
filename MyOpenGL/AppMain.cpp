@@ -7,9 +7,8 @@ const int WINSIZE_Y = 600;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow *window);
-unsigned int compileVertexShader();
+unsigned int compileVertexColorShader();
 unsigned int compileFragmentShader();
-unsigned int compileFragmentShader2();
 unsigned int prepareShaderProgram(unsigned int vertexShader, unsigned int fragmentShader);
 
 int main() {
@@ -37,15 +36,21 @@ int main() {
 
 	// 삼각형을 그려보자
 	float vertices[] = {
-		-0.5f - 0.5f, -0.5f, 0.0f,
-		0.0f - 0.5f, 0.5f, 0.0f,
-		0.5f - 0.5f,  -0.5f, 0.0f,
+		-0.25f - 0.5f, -0.25f, 0.0f,	// pos
+		1.0f,0.0f, 0.0f,			// color
+		0.0f - 0.5f, 0.25f, 0.0f,	// pos
+		0.0f,1.0f, 0.0f,			// color
+		0.25f - 0.5f,  -0.25f, 0.0f,	// pos
+		0.0f,0.0f, 1.0f				// color
 	};
 
 	float vertices2[] = {
-		-0.5f + 0.5f, -0.5f, 0.0f,
-		0.0f + 0.5f, 0.5f, 0.0f,
-		0.5f + 0.5f,  -0.5f, 0.0f
+		-0.25f + 0.25f, -0.25f, 0.0f,
+		1.0f,1.0f, 0.0f,		// color
+		0.0f + 0.25f, 0.25f, 0.0f,
+		1.0f,1.0f, 0.0f,		// color
+		0.25f + 0.25f,  -0.25f, 0.0f,
+		1.0f,1.0f, 0.0f			// color
 	};
 
 	unsigned int indices[] = {
@@ -65,15 +70,19 @@ int main() {
 	glBindVertexArray(VAO[0]);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO[0]);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+	glEnableVertexAttribArray(1);
 
 
 	glBindVertexArray(VAO[1]);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO[1]);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices2), vertices2, GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+	glEnableVertexAttribArray(1);
 
 	// EBO
 	//unsigned int EBO;
@@ -84,12 +93,8 @@ int main() {
 	//glEnableVertexAttribArray(0);
 
 	// 셰이더 준비
-	unsigned int vs = compileVertexShader();
-	unsigned int fs = compileFragmentShader();
-	unsigned int shaderProgram = prepareShaderProgram(vs, fs);
-
-	unsigned int vs2 = compileVertexShader();
-	unsigned int fs2 = compileFragmentShader2();
+	unsigned int vs2 = compileVertexColorShader();
+	unsigned int fs2 = compileFragmentShader();
 	unsigned int shaderProgram2 = prepareShaderProgram(vs2, fs2);
 
 	// 게임루프?
@@ -99,17 +104,14 @@ int main() {
 		// rendering commands here
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
-		{
-			glUseProgram(shaderProgram);
-
+		{	
 			// 인덱스로 그려주는 방법
 			//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
 			// VAO 로 그려주는 방법
+			glUseProgram(shaderProgram2);
 			glBindVertexArray(VAO[0]);
 			glDrawArrays(GL_TRIANGLES, 0, 3);
-
-			glUseProgram(shaderProgram2);
 			glBindVertexArray(VAO[1]);
 			glDrawArrays(GL_TRIANGLES, 0, 3);
 
@@ -122,7 +124,6 @@ int main() {
 
 	glDeleteVertexArrays(2, VAO);
 	glDeleteBuffers(2, VBO);
-	glDeleteProgram(shaderProgram);
 	glDeleteProgram(shaderProgram2);
 	glfwTerminate();
 	return 0;
@@ -155,12 +156,15 @@ unsigned int prepareShaderProgram(unsigned int vertexShader, unsigned int fragme
 	return shaderProgram;
 }
 
-unsigned int compileVertexShader() {
+unsigned int compileVertexColorShader() {
 	const char *vertexShaderSource = "#version 330 core\n"
 		"layout (location = 0) in vec3 aPos;\n"
+		"layout (location = 1) in vec3 aColor;\n"
+		"out vec3 ourColor;\n"
 		"void main()\n"
 		"{\n"
 		"   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
+		"   ourColor = aColor;\n"
 		"}\0";
 
 	unsigned int vertexShader;
@@ -173,22 +177,9 @@ unsigned int compileVertexShader() {
 unsigned int compileFragmentShader() {
 	const char *fragmentShaderSource = "#version 330 core\n"
 		"out vec4 FragColor;\n"
+		"in vec3 ourColor;\n"
 		"void main(){\n"
-		"	FragColor = vec4(0.3f,0.85f,1.0f,1.0f);\n"
-		"}\0";
-
-	unsigned int fragmentShader;
-	fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-	glCompileShader(fragmentShader);
-	return fragmentShader;
-}
-
-unsigned int compileFragmentShader2() {
-	const char *fragmentShaderSource = "#version 330 core\n"
-		"out vec4 FragColor;\n"
-		"void main(){\n"
-		"	FragColor = vec4(1.0f,1.0f,0.0f,1.0f);\n"
+		"	FragColor = vec4(ourColor.x,ourColor.y,ourColor.z,1.0f);\n"
 		"}\0";
 
 	unsigned int fragmentShader;
