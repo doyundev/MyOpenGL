@@ -1,15 +1,13 @@
 #include <iostream>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include "Shader.h"
 
 const int WINSIZE_X = 800;
 const int WINSIZE_Y = 600;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow *window);
-unsigned int compileVertexColorShader();
-unsigned int compileFragmentShader();
-unsigned int prepareShaderProgram(unsigned int vertexShader, unsigned int fragmentShader);
 
 int main() {
 	glfwInit();
@@ -92,10 +90,8 @@ int main() {
 	//glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 	//glEnableVertexAttribArray(0);
 
-	// 셰이더 준비
-	unsigned int vs2 = compileVertexColorShader();
-	unsigned int fs2 = compileFragmentShader();
-	unsigned int shaderProgram2 = prepareShaderProgram(vs2, fs2);
+	// 셰이더 클래스 준비
+	Shader* myShader = new Shader("./Shader/vs.glsl", "./Shader/fs.glsl");
 
 	// 게임루프?
 	while (!glfwWindowShouldClose(window)) {
@@ -109,8 +105,8 @@ int main() {
 			//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
 			// VAO 로 그려주는 방법
-			glUseProgram(shaderProgram2);
-			int uniformLocation = glGetUniformLocation(shaderProgram2, "tintColor");
+			myShader->use();
+			int uniformLocation = glGetUniformLocation(myShader->ID, "tintColor");
 			glUniform3f(uniformLocation, 1.0f, 0.0f, 0.0f);
 			glBindVertexArray(VAO[0]);
 			glDrawArrays(GL_TRIANGLES, 0, 3);
@@ -120,7 +116,7 @@ int main() {
 			glDrawArrays(GL_TRIANGLES, 0, 3);
 
 			// 주석을 풀면 와이어프레임으로 보인다.
-			 //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+			//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		}
 		glfwSwapBuffers(window); // 더블 버퍼링
 		glfwPollEvents();
@@ -128,7 +124,10 @@ int main() {
 
 	glDeleteVertexArrays(2, VAO);
 	glDeleteBuffers(2, VBO);
-	glDeleteProgram(shaderProgram2);
+
+	glDeleteProgram(myShader->ID);
+	delete myShader; myShader = 0;
+
 	glfwTerminate();
 	return 0;
 }
@@ -143,55 +142,3 @@ void processInput(GLFWwindow *window) {
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, true);
 }
-
-#pragma region Compile Shader
-
-unsigned int prepareShaderProgram(unsigned int vertexShader, unsigned int fragmentShader) {
-	unsigned int shaderProgram;
-	shaderProgram = glCreateProgram();
-	glAttachShader(shaderProgram, vertexShader);
-	glAttachShader(shaderProgram, fragmentShader);
-	glLinkProgram(shaderProgram);
-
-	// 링크하고 나면 사용하지 않으므로 제거한다
-	glDeleteShader(vertexShader);
-	glDeleteShader(fragmentShader);
-
-	return shaderProgram;
-}
-
-unsigned int compileVertexColorShader() {
-	const char *vertexShaderSource = "#version 330 core\n"
-		"layout (location = 0) in vec3 aPos;\n"
-		"layout (location = 1) in vec3 aColor;\n"
-		"out vec3 ourColor;\n"
-		"void main()\n"
-		"{\n"
-		"   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-		"   ourColor = aColor;\n"
-		"}\0";
-
-	unsigned int vertexShader;
-	vertexShader = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-	glCompileShader(vertexShader);
-	return vertexShader;
-}
-
-unsigned int compileFragmentShader() {
-	const char *fragmentShaderSource = "#version 330 core\n"
-		"out vec4 FragColor;\n"
-		"uniform vec3 tintColor;\n"
-		"in vec3 ourColor;\n"
-		"void main(){\n"
-		"	FragColor = vec4(tintColor.x,tintColor.y,tintColor.z,1.0f);\n"
-		"}\0";
-
-	unsigned int fragmentShader;
-	fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-	glCompileShader(fragmentShader);
-	return fragmentShader;
-}
-
-#pragma  endregion
