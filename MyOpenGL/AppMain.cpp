@@ -6,6 +6,10 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
+#include "./imgui.h"
+#include "./imgui_impl_glfw.h"
+#include "./imgui_impl_opengl3.h"
+
 const int WINSIZE_X = 800;
 const int WINSIZE_Y = 600;
 
@@ -34,6 +38,14 @@ int main() {
 	}
 
 	framebuffer_size_callback(window, WINSIZE_X, WINSIZE_Y);
+
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO(); (void)io;
+
+	ImGui::StyleColorsDark();
+	ImGui_ImplGlfw_InitForOpenGL(window, true);
+	ImGui_ImplOpenGL3_Init("#version 330 core");
 
 	// 셰이더
 	Shader* myShader = new Shader("./Shader/color/vs.glsl", "./Shader/color/fs.glsl");
@@ -155,8 +167,22 @@ int main() {
 			// 주석을 풀면 와이어프레임으로 보인다.
 			// glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		}
-		glfwSwapBuffers(window); // 더블 버퍼링
 		glfwPollEvents();
+
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
+		ImGui::Begin("Hello World");
+		{
+			ImGui::Text("text");
+		}
+		ImGui::End();
+
+		// Render
+		ImGui::Render();
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+		glfwSwapBuffers(window); // 더블 버퍼링
 	}
 
 	glDeleteVertexArrays(1, &VAO);
