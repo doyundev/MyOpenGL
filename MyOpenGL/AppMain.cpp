@@ -15,6 +15,9 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+// My Class Headers
+#include "RenderingSystem.h"
+
 const int WINSIZE_X = 800;
 const int WINSIZE_Y = 600;
 
@@ -22,34 +25,15 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow *window);
 
 int main() {
-	glfwInit();
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	GLFWwindow* window = glfwCreateWindow(WINSIZE_X, WINSIZE_Y, "Learn OpenGL", NULL, NULL);
-	if (window == NULL) {
-		std::cout << "Failed to create GLFW window" << std::endl;
-		glfwTerminate();
-		system("pause");
-		return -1;
-	}
-	glfwMakeContextCurrent(window);
-
-	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-		std::cout << "Failed to initialize GLAD" << std::endl;
-		system("pause");
-		return -1;
-	}
-
-	framebuffer_size_callback(window, WINSIZE_X, WINSIZE_Y);
+	auto renderingSystem = new RenderingSystem();
 
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
 
 	ImGui::StyleColorsDark();
-	ImGui_ImplGlfw_InitForOpenGL(window, true);
+	ImGui_ImplGlfw_InitForOpenGL(renderingSystem->GetWindow(), true);
 	ImGui_ImplOpenGL3_Init("#version 330 core");
 
 	// 셰이더
@@ -93,7 +77,6 @@ int main() {
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
 
 	// 2) 어트리뷰트 설정
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0); // Position
@@ -155,8 +138,8 @@ int main() {
 	float rotZ = 0.0f;
 
 	// 게임루프?
-	while (!glfwWindowShouldClose(window)) {
-		processInput(window);
+	while (!glfwWindowShouldClose(renderingSystem->GetWindow())) {
+		processInput(renderingSystem->GetWindow());
 
 		// GUI
 		ImGui_ImplOpenGL3_NewFrame();
@@ -170,8 +153,7 @@ int main() {
 		ImGui::End();
 
 		// rendering commands here
-		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
+		renderingSystem->BeginRender();
 		{	
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, texture1);
@@ -203,8 +185,7 @@ int main() {
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-		glfwPollEvents();
-		glfwSwapBuffers(window); // 더블 버퍼링
+		renderingSystem->EndRender();
 	}
 
 	glDeleteVertexArrays(1, &VAO);
@@ -217,7 +198,8 @@ int main() {
 	glDeleteProgram(texShader->ID);
 	delete texShader; texShader = 0;
 
-	glfwTerminate();
+	delete renderingSystem; renderingSystem = NULL;
+
 	return 0;
 }
 

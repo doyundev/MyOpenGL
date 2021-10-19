@@ -16,6 +16,9 @@
     <Filter Include="imGUI">
       <UniqueIdentifier>{0984f3b5-b7e5-402e-9c77-601c5dfa6bce}</UniqueIdentifier>
     </Filter>
+    <Filter Include="OpenGL">
+      <UniqueIdentifier>{2485f0d8-c08a-43f2-8115-4306092e5ac9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AppMain.cpp">
@@ -48,12 +51,18 @@
     <ClCompile Include="..\imgui-1.85\imgui_widgets.cpp">
       <Filter>imGUI</Filter>
     </ClCompile>
+    <ClCompile Include="RenderingSystem.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Shader.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="stb_image.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderingSystem.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>

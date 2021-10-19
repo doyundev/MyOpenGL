@@ -147,9 +147,11 @@
     <ClCompile Include="..\imgui-1.85\imgui_widgets.cpp" />
     <ClCompile Include="AppMain.cpp" />
     <ClCompile Include="glad.c" />
+    <ClCompile Include="RenderingSystem.cpp" />
     <ClCompile Include="Shader.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="RenderingSystem.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="stb_image.h" />
   </ItemGroup>
