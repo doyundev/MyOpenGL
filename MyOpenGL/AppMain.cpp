@@ -10,6 +10,11 @@
 #include "./imgui_impl_glfw.h"
 #include "./imgui_impl_opengl3.h"
 
+// GL Mathematics
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 const int WINSIZE_X = 800;
 const int WINSIZE_Y = 600;
 
@@ -98,7 +103,6 @@ int main() {
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6*sizeof(float))); // UV
 	glEnableVertexAttribArray(2);
 
-
 	// 3) 텍스쳐 생성
 	unsigned int texture1,texture2;
 	glGenTextures(1, &texture1);
@@ -147,9 +151,23 @@ int main() {
 	texShader->setInt("texture1", 0);
 	texShader->setInt("texture2", 1);
 
+	float mixRate = 0.2f;
+	float rotZ = 0.0f;
+
 	// 게임루프?
 	while (!glfwWindowShouldClose(window)) {
 		processInput(window);
+
+		// GUI
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
+		ImGui::Begin("Setting");
+		{
+			ImGui::DragFloat("Mix Rate", &mixRate, 0.01f, 0.0f, 1.0f);
+			ImGui::DragFloat("Rot Z", &rotZ, 0.1f, 0.0f, 360.0f);
+		}
+		ImGui::End();
 
 		// rendering commands here
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -160,28 +178,32 @@ int main() {
 			glActiveTexture(GL_TEXTURE1);
 			glBindTexture(GL_TEXTURE_2D, texture2);
 
+			glm::mat4 trans = glm::mat4(1.0f);
+			trans = glm::rotate(trans, glm::radians(rotZ), glm::vec3(0, 0, 1));
+			trans = glm::translate(trans, glm::vec3(0.0f, 0.0f, 0.0f));
+
 			texShader->use();
+			texShader->setFloat("mixRate",mixRate);
+			unsigned int transformLoc = glGetUniformLocation(texShader->ID, "transform");
+			glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
+
 			glBindVertexArray(VAO);
+			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+			trans = glm::mat4(1.0f);
+			trans = glm::translate(trans, glm::vec3(0.5f, 0.0f, 0.0f));
+			glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
 			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
 			// 주석을 풀면 와이어프레임으로 보인다.
 			// glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		}
-		glfwPollEvents();
 
-		ImGui_ImplOpenGL3_NewFrame();
-		ImGui_ImplGlfw_NewFrame();
-		ImGui::NewFrame();
-		ImGui::Begin("Hello World");
-		{
-			ImGui::Text("text");
-		}
-		ImGui::End();
-
-		// Render
+		// Render UI
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
+		glfwPollEvents();
 		glfwSwapBuffers(window); // 더블 버퍼링
 	}
 

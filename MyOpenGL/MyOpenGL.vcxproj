@@ -70,13 +70,13 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>E:\PrivateWork\MyOpenGL\imgui-1.85;E:\PrivateWork\MyOpenGL\imgui-1.85\backends;C:\OpenGLPrecompiled\glad\include;C:\OpenGLPrecompiled\include;$(IncludePath)</IncludePath>
+    <IncludePath>E:\PrivateWork\MyOpenGL\imgui-1.85;E:\PrivateWork\MyOpenGL\imgui-1.85\backends;C:\OpenGLPrecompiled\glad\include;C:\OpenGLPrecompiled\include;E:\PrivateWork\MyOpenGL\glm;$(IncludePath)</IncludePath>
     <LibraryPath>C:\OpenGLPrecompiled\lib-vc2017;$(LibraryPath)</LibraryPath>
     <SourcePath>$(SourcePath)</SourcePath>
     <ReferencePath>$(ReferencePath)</ReferencePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>E:\PrivateWork\MyOpenGL\imgui-1.85;E:\PrivateWork\MyOpenGL\imgui-1.85\backends;C:\OpenGLPrecompiled\glad\include;C:\OpenGLPrecompiled\include;$(IncludePath)</IncludePath>
+    <IncludePath>E:\PrivateWork\MyOpenGL\imgui-1.85;E:\PrivateWork\MyOpenGL\imgui-1.85\backends;C:\OpenGLPrecompiled\glad\include;C:\OpenGLPrecompiled\include;E:\PrivateWork\MyOpenGL\glm;$(IncludePath)</IncludePath>
     <LibraryPath>C:\OpenGLPrecompiled\lib-vc2017;$(LibraryPath)</LibraryPath>
     <SourcePath>$(SourcePath)</SourcePath>
     <ReferencePath>$(ReferencePath)</ReferencePath>
