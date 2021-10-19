@@ -21,8 +21,8 @@
 const int WINSIZE_X = 800;
 const int WINSIZE_Y = 600;
 
-void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow *window);
+unsigned int loadTexture(const char * texPath, GLenum format = GL_RGB);
 
 int main() {
 
@@ -39,16 +39,6 @@ int main() {
 	// 셰이더
 	Shader* myShader = new Shader("./Shader/color/vs.glsl", "./Shader/color/fs.glsl");
 	Shader* texShader = new Shader("./Shader/texture/vs.glsl", "./Shader/texture/fs.glsl");
-
-	// 버텍스 정보
-	float vertices[] = {
-		-0.25f - 0.5f, -0.25f, 0.0f,	// pos
-		1.0f,0.0f, 0.0f,			// color
-		0.0f - 0.5f, 0.25f, 0.0f,	// pos
-		0.0f,1.0f, 0.0f,			// color
-		0.25f - 0.5f,  -0.25f, 0.0f,	// pos
-		0.0f,0.0f, 1.0f				// color
-	};
 
 	// 텍스쳐 사용하는 놈으로 그린다
 	// 0 1
@@ -88,47 +78,8 @@ int main() {
 
 	// 3) 텍스쳐 생성
 	unsigned int texture1,texture2;
-	glGenTextures(1, &texture1);
-	glBindTexture(GL_TEXTURE_2D, texture1);
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	int width, height, nrChannels;
-
-	glBindTexture(GL_TEXTURE_2D, texture1);
-	unsigned char *data = stbi_load("./Resources/wall.jpg", &width, &height, &nrChannels, 0);
-	if (data) {
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data); // 텍스쳐 로드
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-	else {
-		std::cout << "Failed to load texture" << std::endl;
-	}
-	stbi_image_free(data); // 로드를 완료했으므로 해제해준다.
-
-
-	// 5) 텍스쳐2
-	glGenTextures(1, &texture2);
-	glBindTexture(GL_TEXTURE_2D, texture2);
-	glGenTextures(1, &texture2);
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	glBindTexture(GL_TEXTURE_2D, texture2);
-	data= stbi_load("./Resources/awesomeface.jpg", &width, &height, &nrChannels, 0);
-	if (data) {
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data); // 텍스쳐 로드
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-	stbi_image_free(data); // 로드를 완료했으므로 해제해준다.
+	texture1 = loadTexture("./Resources/wall.jpg");
+	texture2 = loadTexture("./Resources/awesomeface.jpg", GL_RGBA);
 
 	texShader->use();
 	texShader->setInt("texture1", 0);
@@ -203,13 +154,36 @@ int main() {
 	return 0;
 }
 
-// 유저가 화면 사이즈를 변경했을 때 호출되는 콜백
-void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
-	glViewport(0, 0, width, height);
-}
-
 void processInput(GLFWwindow *window) {
 	// ESC를 눌렀을 때 윈도우가 닫히도록한다
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, true);
+}
+
+unsigned int loadTexture(const char * texPath, GLenum format)
+{
+	unsigned int texID;
+	glGenTextures(1, &texID);
+	glBindTexture(GL_TEXTURE_2D, texID);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	int width, height, nrChannels;
+
+	glBindTexture(GL_TEXTURE_2D, texID);
+	unsigned char *data = stbi_load(texPath, &width, &height, &nrChannels, 0);
+	if (data) {
+		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data); // 텍스쳐 로드
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else {
+		std::cout << "Failed to load texture" << std::endl;
+	}
+	stbi_image_free(data); // 로드를 완료했으므로 해제해준다.
+
+	return texID;
 }
