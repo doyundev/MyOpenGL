@@ -53,10 +53,10 @@ int main() {
 	// 0 1
 	// 2 3
 	float vertices2[] = {
-		-0.5f, 0.5f, 0.0f,	0.0f, 0.0f,
-		0.5f, 0.5f, 0.0f,	1.0f,0.0f, 
-		-0.5f, -0.5f, 0.0f,	0.0f, 1.0f,
-		0.5f, -0.5f, 0.0f,	1.0f,1.0f
+		-0.5f, 0.5f, 0.0f,	1.0f,1.0f,0.0f,	0.0f, 0.0f,
+		0.5f, 0.5f, 0.0f,	1.0f,0.0f,0.0f,	1.0f,0.0f,
+		-0.5f, -0.5f, 0.0f,	0.0f,0.0f,1.0f,	0.0f, 1.0f,
+		0.5f, -0.5f, 0.0f,	0.0f,1.0f,0.0f,	1.0f,1.0f
 	};
 
 	unsigned int indices[] = {
@@ -79,10 +79,12 @@ int main() {
 
 
 	// 2) 어트리뷰트 설정
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0); // Position
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0); // Position
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3*sizeof(float))); // UV
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float))); // Color
 	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6*sizeof(float))); // UV
+	glEnableVertexAttribArray(2);
 
 
 	// 3) 텍스쳐 생성
